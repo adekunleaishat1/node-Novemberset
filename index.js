@@ -8,6 +8,7 @@ app.use(express.urlencoded({extended:true}))
 
 
 let alluser = []
+let todoarray = []
 let errormessage ;
 app.get("/",(request, response)=>{
 //    response.send("Welcome to node class")
@@ -56,6 +57,27 @@ app.post("/user/login",(req,res)=>{
    res.redirect("/login")
   }
 })
+
+app.get("/todo",(req, res)=>{
+   res.render("todo",{todoarray})
+})
+
+app.post("/addtodo",(req,res)=>{
+   // console.log(req.body);
+   todoarray.push(req.body)
+   res.redirect("/todo")
+   
+})
+
+app.post("/todo/delete/:index", (req,res)=>{
+   console.log(req.params);
+   
+   // console.log(req.body);
+   const {index} = req.params
+   todoarray.splice(index, 1)
+   res.redirect("/todo")
+})
+
 
 const port = 5007
 
