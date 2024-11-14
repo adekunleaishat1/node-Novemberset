@@ -25,6 +25,9 @@
          <form action="/todo/delete/<%= index %>" method="post">
             <button type="submit" class="btn btn-danger">Delete</button>
          </form>
+         <form action="/todo/edit/<%= index %>" method="get">
+            <button type="submit">Edit</button>
+         </form>
         
     <% }) %>
 </body>

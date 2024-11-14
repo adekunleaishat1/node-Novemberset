@@ -1,10 +1,20 @@
 const express = require("express")
 const app = express()
 const ejs = require("ejs")
+const mongoose = require("mongoose")
 
 
 app.set("view engine", "ejs")
 app.use(express.urlencoded({extended:true}))
+
+ //CRUD CREATE, READ, UPDATE AND DELETE
+ const userschema = mongoose.Schema({
+     username:{type:String},
+     email:{type:String},
+     password:{type:String}
+  })
+
+const usermodel = mongoose.model("user_collection",userschema)
 
 
 let alluser = []
@@ -33,15 +43,19 @@ app.get("/login",(req, res)=>{
    res.render("login")
 })
 
-app.post("/user/signup",(req,res)=>{
+app.post("/user/signup", async(req,res)=>{
   const {email, username , password} = req.body
 if (!email || !username || !password) {
    console.log("input fields cannot be empty");
    errormessage = "input fields cannot be empty"
    res.redirect("/signup")
 }else{
-   alluser.push(req.body)
+   // alluser.push(req.body)
+  const user = await usermodel.create(req.body)
+  if (user) {
    res.redirect("/login")
+  }
+  
 }
 })
 
@@ -78,6 +92,38 @@ app.post("/todo/delete/:index", (req,res)=>{
    res.redirect("/todo")
 })
 
+app.get("/todo/edit/:index",(req,res)=>{
+   console.log(req.params);
+   const {index} = req.params
+ const onetodo = todoarray[index]
+   res.render("edit",{onetodo, index})
+})
+
+
+app.post("/todo/update/:index",(req, res)=>{
+  console.log(req.body);
+  console.log(req.params);
+  const { index } = req.params
+  todoarray[index] = req.body
+  res.redirect("/todo")
+})
+
+
+const uri = "mongodb+srv://aishatadekunle877:aishat@cluster0.t92x8pf.mongodb.net/novemberclass?retryWrites=true&w=majority&appName=Cluster0"
+
+const connect = async() =>{
+   try {
+    const connection = await  mongoose.connect(uri)
+    if (connection) {
+     console.log("database connected successfully");
+    }
+
+   } catch (error) {
+      console.log(error);
+      
+   }
+}
+connect()
 
 const port = 5007
 
