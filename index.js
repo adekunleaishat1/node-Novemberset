@@ -8,13 +8,13 @@ app.set("view engine", "ejs")
 app.use(express.urlencoded({extended:true}))
 
  //CRUD CREATE, READ, UPDATE AND DELETE
- const userschema = mongoose.Schema({
-     username:{type:String},
-     email:{type:String},
-     password:{type:String}
+ const usersschema = mongoose.Schema({
+     username:{type:String, required:true,trim:true},
+     email:{type:String ,unique:true,required:true,trim:true},
+     password:{type:String,required:true,trim:true}
   })
 
-const usermodel = mongoose.model("user_collection",userschema)
+const usermodel = mongoose.model("user_collections",usersschema)
 
 
 let alluser = []
@@ -44,32 +44,44 @@ app.get("/login",(req, res)=>{
 })
 
 app.post("/user/signup", async(req,res)=>{
-  const {email, username , password} = req.body
-if (!email || !username || !password) {
-   console.log("input fields cannot be empty");
-   errormessage = "input fields cannot be empty"
-   res.redirect("/signup")
-}else{
-   // alluser.push(req.body)
-  const user = await usermodel.create(req.body)
-  if (user) {
-   res.redirect("/login")
-  }
+try {
+   const {email, username , password} = req.body
+   if (!email || !username || !password) {
+      console.log("input fields cannot be empty");
+      errormessage = "input fields cannot be empty"
+      res.redirect("/signup")
+   }else{
+      // alluser.push(req.body)
+     const user = await usermodel.create(req.body)
+     if (user) {
+      res.redirect("/login")
+     }
+     
+   }
+} catch (error) {
+   console.log(error.message);
+   if (error.message.includes("E11000 duplicate key error collection")) {
+      errormessage = "Email already exist"
+      res.redirect("/signup")
+   }else{
+      errormessage = error.message
+   }
   
 }
 })
 
-app.post("/user/login",(req,res)=>{
+app.post("/user/login", async(req,res)=>{
    console.log(req.body);
    const {email, password} = req.body
-  const existemail = alluser.find((user)=> user.email == email)
-  if (existemail && existemail.password == password) {
+ const existuser = await usermodel.findOne({email})
+ console.log(existuser);
+ if (existuser && existuser.password == password) {
    console.log("login successful");
-   res.redirect("/")
-  }else{
+      res.redirect("/")
+ }else{
    console.log("invalid user");
    res.redirect("/login")
-  }
+ }
 })
 
 app.get("/todo",(req, res)=>{
